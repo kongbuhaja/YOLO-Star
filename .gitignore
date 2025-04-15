@@ -27,7 +27,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 requirements.txt
-setup.py
+# setup.py
 ultralytics.egg-info
 
 # PyInstaller
@@ -174,5 +174,4 @@ pnnx*
 # calibration image
 calibration_*.npy
 
-!DCNv4_op/setup.py
 .github
