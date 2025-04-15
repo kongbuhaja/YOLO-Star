@@ -63,6 +63,19 @@ from ultralytics.nn.modules import (
     TorchVision,
     WorldDetect,
     v10Detect,
+    DConv,
+    DC2f,
+    DC3k2,
+    PSD,
+    C2PSD,
+    C2PSDO,
+    DC3k2O,
+    DC3k2D,
+    DC3k2T,
+    Star,
+    Star2,
+    Star_org,
+    Star_
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
 from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
@@ -145,7 +158,8 @@ class BaseModel(torch.nn.Module):
             (torch.Tensor): The last output of the model.
         """
         y, dt, embeddings = [], [], []  # outputs
-        for m in self.model:
+        x = x.cuda()
+        for m in self.model.cuda():
             if m.f != -1:  # if not from previous layer
                 x = y[m.f] if isinstance(m.f, int) else [x if j == -1 else y[j] for j in m.f]  # from earlier layers
             if profile:
@@ -1131,6 +1145,18 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             SCDown,
             C2fCIB,
             A2C2f,
+            
+            DConv,
+            DC2f,
+            DC3k2,
+            PSD,
+            C2PSD,
+            C2PSDO,
+            DC3k2O,
+            DC3k2D,
+            DC3k2T,
+            Star_org,
+            Star_
         }
     )
     repeat_modules = frozenset(  # modules with 'repeat' arguments
@@ -1150,6 +1176,14 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             C2fCIB,
             C2PSA,
             A2C2f,
+
+            C2PSD,
+            C2PSDO,
+            DC3k2O,
+            DC3k2D,
+            DC3k2T,
+            Star_org,
+            Star_
         }
     )
     for i, (f, n, m, args) in enumerate(d["backbone"] + d["head"]):  # from, number, module, args
@@ -1177,7 +1211,7 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             if m in repeat_modules:
                 args.insert(2, n)  # number of repeats
                 n = 1
-            if m is C3k2:  # for M/L/X sizes
+            if m in [C3k2, DC3k2, DC3k2O, DC3k2D, DC3k2T]:  # for M/L/X sizes
                 legacy = False
                 if scale in "mlx":
                     args[3] = True
@@ -1213,6 +1247,13 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             args = [c1, c2, *args[1:]]
         elif m is CBFuse:
             c2 = ch[f[-1]]
+        elif m in [Star, Star2]:
+            ch_ = [ch[x] for x in f]
+            c2 = max(ch_)
+            if m is Star:
+                args = [ch_]
+            elif m is Star2:
+                args = [ch_, *args]
         elif m in frozenset({TorchVision, Index}):
             c2 = args[0]
             c1 = ch[f]

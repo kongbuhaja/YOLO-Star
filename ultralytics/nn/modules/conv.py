@@ -7,6 +7,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from DCNv4 import DCNv4
+
 __all__ = (
     "Conv",
     "Conv2",
@@ -22,6 +24,7 @@ __all__ = (
     "Concat",
     "RepConv",
     "Index",
+    "DConv",
 )
 
 
@@ -712,3 +715,75 @@ class Index(nn.Module):
             (torch.Tensor): Selected tensor.
         """
         return x[self.index]
+
+class DConv(nn.Module):
+    def __init__(self, c1, c2, k=3, s=1, p=None, g=1, d=1, gc=8, dk=3, act=True, e=1.0):
+        super().__init__()
+        assert k==3
+        c = int(c1 * e)//gc*gc
+        self.cv1 = Conv(c1, c, 1, 1, act=False)
+        # self.cv1 = nn.Conv2d(c1, c, 1, 1)
+        self.conv = DCN(c, k, s, autopad(k, p, d), d, dk=dk, gc=gc)
+        # self.conv = DCNv4(c, k, s, autopad(k, p, d), group=dg, dw_kernel_size=dk, without_pointwise=False, output_bias=False)
+        self.cv2 = Conv(c, c2, 1, 1)
+
+    def forward(self, x):
+        return self.cv2(self.conv(self.cv1(x)))
+    
+class DCN(nn.Module):
+    default_act = nn.SiLU()
+
+    def __init__(self, c, k=3, s=1, p=None, d=1, gc=8, dk=3, act=True):
+        super().__init__()
+        assert k==3
+        self.conv = DCNv4(c, k, s, autopad(k, p, d), group=c//gc, dw_kernel_size=dk, without_pointwise=False, output_bias=False)
+
+    def forward(self, x):
+        """Apply convolution, batch normalization and activation to input tensor."""
+        return self.conv(x)
+    
+class Star(nn.Module):
+    def __init__(self, ch):
+        super().__init__()
+        self.ascending = ch[0] <= ch[-1]
+
+    def forward(self, x):
+        x = x if self.ascending else x[::-1]
+
+        y = x[0]
+        for xx in x[1:]:
+            yc = y.shape[1]
+            xxc = xx.shape[1]
+            y = y.repeat([1, xxc//yc, 1, 1]) * xx
+        return y
+    
+class Star2(nn.Module):
+    def __init__(self, ch, layer):
+        super().__init__()
+        self.ascending = ch[0] <= ch[-1]
+        ch = ch if self.ascending else ch[::-1]
+
+        # ch_ = []
+        # for i in range(len(ch) - 1):
+        #     ch_ += [[ch[i], ch[i+1]]]
+        ch_ = [[ch[i], ch[i+1]] for i in range(len(ch)-1)]
+        
+        self.layers = []
+        for c1, c2, in ch_:
+            if layer.lower() == 'conv':
+                self.layers += [Conv(c1, c2, 3, 1, autopad(3))]
+            elif layer.lower() == 'pw_conv':
+                self.layers += [Conv(c1, c2, 1, 1, autopad(1))]
+            elif layer.lower() == 'gpw_conv':
+                self.layers += [Conv(c1, c2, 1, 1, autopad(1), g=math.gcd(c1, c2))]
+        self.layers = nn.ModuleList(self.layers)
+
+
+    def forward(self, x):
+        x = x if self.ascending else x[::-1]
+
+        y = x[0]
+        for layer, xx in zip(self.layers, x[1:]):
+            y = layer(y) * xx
+        return y
+    

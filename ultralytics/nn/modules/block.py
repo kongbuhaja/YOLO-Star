@@ -7,7 +7,7 @@ import torch.nn.functional as F
 
 from ultralytics.utils.torch_utils import fuse_conv_and_bn
 
-from .conv import Conv, DWConv, GhostConv, LightConv, RepConv, autopad
+from .conv import Conv, DWConv, GhostConv, LightConv, RepConv, autopad, DCN, DConv
 from .transformer import TransformerBlock
 
 __all__ = (
@@ -50,6 +50,7 @@ __all__ = (
     "PSA",
     "SCDown",
     "TorchVision",
+    "DC2f",
 )
 
 
@@ -1859,3 +1860,307 @@ class A2C2f(nn.Module):
         if self.gamma is not None:
             return x + self.gamma.view(-1, len(self.gamma), 1, 1) * y
         return y
+
+class DBottleneck(nn.Module):
+    """Standard bottleneck."""
+
+    def __init__(self, c1, c2, shortcut=True, g=1, k=(3, 3), e=0.5, de=1.0, gc=8):
+        """Initializes a standard bottleneck module with optional shortcut connection and configurable parameters."""
+        super().__init__()
+        c_ = int(c2 * e)  # hidden channels
+        self.cv1 = DConv(c1, c_, k[0], e=de, gc=gc)
+        self.cv2 = DConv(c_, c2, k[1], g=g, e=de, gc=gc)
+        self.add = shortcut and c1 == c2
+
+    def forward(self, x):
+        """Applies the YOLO FPN to input data."""
+        return x + self.cv2(self.cv1(x)) if self.add else self.cv2(self.cv1(x))
+    
+class DBottleneck2(nn.Module):
+    """Standard bottleneck."""
+
+    def __init__(self, c1, c2, shortcut=True, g=1, k=(3, 3), e=0.5, gc=8):
+        """Initializes a standard bottleneck module with optional shortcut connection and configurable parameters."""
+        super().__init__()
+        c_ = int(c2 * e)//gc*gc  # hidden channels
+        self.pw1 = Conv(c1, c_, 1, 1)
+        self.cv1 = DCN(c_, k[0], gc=gc)
+        self.cv2 = DCN(c_, k[1], gc=gc)
+        self.pw2 = Conv(c_, c2, 1, 1)
+        self.add = shortcut and c1 == c2
+
+    def forward(self, x):
+        """Applies the YOLO FPN to input data."""
+        x_ = self.pw2(self.cv2(self.cv1(self.pw1(x))))
+        return x + x_ if self.add else x_
+    
+class RepDBottleneck(DBottleneck):
+    """Rep bottleneck."""
+
+    def __init__(self, c1, c2, shortcut=True, g=1, k=(3, 3), e=0.5):
+        """Initializes a RepBottleneck module with customizable in/out channels, shortcuts, groups and expansion."""
+        super().__init__(c1, c2, shortcut, g, k, e)
+        c_ = int(c2 * e)  # hidden channels
+        self.cv1 = RepConv(c1, c_, k[0], 1)
+
+class DC2f(nn.Module):
+    """Faster Implementation of CSP Bottleneck with 2 convolutions."""
+
+    def __init__(self, c1, c2, n=1, shortcut=False, g=1, e=0.5, gc=8):
+        """Initializes a CSP bottleneck with 2 convolutions and n Bottleneck blocks for faster processing."""
+        super().__init__()
+        self.c = int(c2 * e)  # hidden channels
+        self.cv1 = Conv(c1, 2 * self.c, 1, 1)
+        self.cv2 = Conv((2 + n) * self.c, c2, 1)  # optional act=FReLU(c2)
+         # 8:1.2, 16:1.4
+         # dbottleneck2 16: 1.4
+        self.m = nn.ModuleList(DBottleneck(self.c, self.c, shortcut, g, k=(3, 3), e=1.0, de=1.1, gc=gc) for _ in range(n))
+        # self.m = nn.ModuleList(DBottleneck2(self.c, self.c, shortcut, g, k=(3, 3), e=1.5, gc=gc) for _ in range(n))
+
+
+    def forward(self, x):
+        """Forward pass through C2f layer."""
+        y = list(self.cv1(x).chunk(2, 1))
+        y.extend(m(y[-1]) for m in self.m)
+        return self.cv2(torch.cat(y, 1))
+
+    def forward_split(self, x):
+        """Forward pass using split() instead of chunk()."""
+        y = list(self.cv1(x).split((self.c, self.c), 1))
+        y.extend(m(y[-1]) for m in self.m)
+        return self.cv2(torch.cat(y, 1))
+    
+class DC3k2(C2f):
+    """Faster Implementation of DCSP Bottleneck with 2 convolutions."""
+
+    def __init__(self, c1, c2, n=1, dc3k=False, e=0.5, g=1, gc=8, shortcut=True):
+        """Initializes the C3k2 module, a faster CSP Bottleneck with 2 convolutions and optional C3k blocks."""
+        super().__init__(c1, c2, n, shortcut, g, e)
+        self.m = nn.ModuleList(
+            DC3k(self.c, self.c, 2, shortcut, g, gc=gc) if dc3k else DBottleneck(self.c, self.c, shortcut, g, de=1.1, gc=gc) for _ in range(n)
+        )
+
+class DC3k(C3):
+    """DC3k is a DCSP bottleneck module with customizable kernel sizes for feature extraction in neural networks."""
+    def __init__(self, c1, c2, n=1, shortcut=True, g=1, e=0.5, k=3, gc=8):
+        """Initializes the C3k module with specified channels, number of layers, and configurations."""
+        super().__init__(c1, c2, n, shortcut, g, e)#, gc=gc)
+        c_ = int(c2 * e)  # hidden channels
+        # self.m = nn.Sequential(*(RepDBottleneck(c_, c_, shortcut, g, k=(k, k), e=1.0) for _ in range(n)))
+        #  8:1.3, 16:1.5
+        self.m = nn.Sequential(*(DBottleneck2(c_, c_, shortcut, g, k=(k, k), e=1.1, gc=gc) for _ in range(n)))
+
+
+## decoT-yolo11
+class DC3k2T(C2f):
+    """Faster Implementation of DCSP Bottleneck with 2 convolutions."""
+
+    def __init__(self, c1, c2, n=1, dc3k=False, e=0.5, g=1, gc=8, shortcut=True):
+        """Initializes the C3k2 module, a faster CSP Bottleneck with 2 convolutions and optional C3k blocks."""
+        super().__init__(c1, c2, n, shortcut, g, e)
+        self.m = nn.ModuleList(
+            DC3kT(self.c, self.c, 2, shortcut, g, gc=gc) if dc3k else DBottleneck(self.c, self.c, shortcut, g, de=1.1, gc=gc) for _ in range(n)
+        )
+
+class DC3kT(C3):
+    """DC3k is a DCSP bottleneck module with customizable kernel sizes for feature extraction in neural networks."""
+    def __init__(self, c1, c2, n=1, shortcut=True, g=1, e=0.5, k=3, gc=8):
+        """Initializes the C3k module with specified channels, number of layers, and configurations."""
+        super().__init__(c1, c2, n, shortcut, g, e)#, gc=gc)
+        c_ = int(c2 * e)  # hidden channels
+        # self.m = nn.Sequential(*(RepDBottleneck(c_, c_, shortcut, g, k=(k, k), e=1.0) for _ in range(n)))
+        #  8:1.3, 16:1.5
+        self.m = nn.Sequential(*(DBottleneck2(c_, c_, shortcut, g, k=(k, k), e=1.2, gc=gc) for _ in range(n)))
+
+## decoD-yolo11
+class DC3(nn.Module):
+    """CSP Bottleneck with 3 convolutions."""
+
+    def __init__(self, c1, c2, n=1, shortcut=True, g=1, e=0.5, gc=8):
+        """Initialize the CSP Bottleneck with given channels, number, shortcut, groups, and expansion values."""
+        super().__init__()
+        self.c_ = int(c2 * e)//gc*gc  # hidden channels
+        self.cv1 = Conv(c1, self.c_, 1, 1)
+        self.cv2 = Conv(c1, self.c_, 1, 1)
+        self.cv3 = Conv(2 * self.c_, c2, 1)  # optional act=FReLU(c2)
+        self.m = nn.Sequential(*(DBottleneck2(self.c_, self.c_, shortcut, g, k=(3, 3), e=1.0) for _ in range(n)))
+
+    def forward(self, x):
+        """Forward pass through the CSP bottleneck with 2 convolutions."""
+        return self.cv3(torch.cat((self.m(self.cv1(x)), self.cv2(x)), 1))
+    
+class DC3k2D(C2f):
+    """Faster Implementation of DCSP Bottleneck with 2 convolutions."""
+
+    def __init__(self, c1, c2, n=1, dc3k=False, e=0.5, g=1, gc=8, shortcut=True):
+        """Initializes the C3k2 module, a faster CSP Bottleneck with 2 convolutions and optional C3k blocks."""
+        super().__init__(c1, c2, n, shortcut, g, e)
+        self.m = nn.ModuleList(
+            DC3kD(self.c, self.c, 2, shortcut, g, gc=gc) if dc3k else DBottleneck2(self.c, self.c, shortcut, g, e=1.3, gc=gc) for _ in range(n)
+        )
+
+class DC3kD(DC3):
+    """DC3k is a DCSP bottleneck module with customizable kernel sizes for feature extraction in neural networks."""
+
+    def __init__(self, c1, c2, n=1, shortcut=True, g=1, e=0.5, k=3, gc=8):
+        """Initializes the C3k module with specified channels, number of layers, and configurations."""
+        super().__init__(c1, c2, n, shortcut, g, e)
+        c_ = int(c2 * e)  # hidden channels
+        # self.m = nn.Sequential(*(RepDBottleneck(c_, c_, shortcut, g, k=(k, k), e=1.0) for _ in range(n)))
+        #  8:1.3, 16:1.5
+        self.m = nn.Sequential(*(DBottleneck2(c_, c_, shortcut, g, k=(k, k), e=1.2, gc=gc) for _ in range(n)))
+##
+
+
+class PSD(nn.Module):
+    def __init__(self, c1, c2, e=0.5, gc=8):
+        super().__init__()
+        assert c1 == c2
+        self.c = int(c1 * e)
+        self.cv1 = Conv(c1, 2 * self.c, 1, 1)
+        self.cv2 = Conv(2 * self.c, c1, 1)
+
+        # self.attn = DConv(self.c, self.c, k=3, e=0.8, gc=gc) # 8:0.9, 16:1.0
+        self.attn = DCN(self.c, gc=gc)
+        self.ffn = nn.Sequential(Conv(self.c, self.c * 2, 1),
+                                 Conv(self.c * 2, self.c, 1, act=False))
+        
+    def forward(self, x):
+        a, b = self.cv1(x).split((self.c, self.c), dim=1)
+        b = b + self.attn(b)
+        b = b + self.ffn(b)
+        return self.cv2(torch.cat((a, b), 1))
+
+class PSDBlock(nn.Module):
+    def __init__(self, c, k=3, gc=8, shortcut=True):
+        super().__init__()
+        # self.attn = DConv(c, c, k=k, e=0.8) # 8:0.9, 16:1.0
+        self.attn = DCN(c, gc=gc)
+        self.ffn = nn.Sequential(Conv(c, c * 2, 1),
+                                 Conv(c * 2, c, 1, act=False))
+        self.add = shortcut
+
+    def forward(self, x):
+        x = x + self.attn(x) if self.add else self.attn(x)
+        x = x + self.ffn(x) if self.add else self.ffn(x)
+        return x
+    
+class C2PSD(nn.Module):
+    def __init__(self, c1, c2, n=1, e=0.5, gc=8):
+        super().__init__()
+        assert c1 == c2
+        self.c = int(c1*e)//gc*gc
+        self.cv1 = Conv(c1, 2 * self.c, 1, 1)
+        self.cv2 = Conv(2 * self.c, c1, 1)
+
+        self.m = nn.Sequential(*(PSDBlock(self.c, k=3, gc=gc) for _ in range(n)))
+
+    def forward(self, x):
+        a, b = self.cv1(x).split((self.c, self.c), dim=1)
+        b = self.m(b)
+        return self.cv2(torch.cat((a, b), 1))
+
+## decoO-yolo11
+class DC3k2O(C2f):
+    """Faster Implementation of DCSP Bottleneck with 2 convolutions."""
+
+    def __init__(self, c1, c2, n=1, dc3k=False, e=0.5, g=1, gc=8, shortcut=True):
+        """Initializes the C3k2 module, a faster CSP Bottleneck with 2 convolutions and optional C3k blocks."""
+        super().__init__(c1, c2, n, shortcut, g, e)
+        self.m = nn.ModuleList(
+            DC3kO(self.c, self.c, 2, shortcut, g, gc=gc) if dc3k else DBottleneck(self.c, self.c, shortcut, g, de=1.1, gc=gc) for _ in range(n)
+        )
+
+class DC3kO(C3):
+    """DC3k is a DCSP bottleneck module with customizable kernel sizes for feature extraction in neural networks."""
+
+    def __init__(self, c1, c2, n=1, shortcut=True, g=1, e=0.5, k=3, gc=8):
+        """Initializes the C3k module with specified channels, number of layers, and configurations."""
+        super().__init__(c1, c2, n, shortcut, g, e)
+        c_ = int(c2 * e)  # hidden channels
+        # self.m = nn.Sequential(*(RepDBottleneck(c_, c_, shortcut, g, k=(k, k), e=1.0) for _ in range(n)))
+        #  8:1.3, 16:1.5
+        self.m = nn.Sequential(*(DBottleneck(c_, c_, shortcut, g, k=(k, k), e=1.0, de=1.1, gc=gc) for _ in range(n)))
+    
+## c2psdO-yolo11n
+class PSDBlockO(nn.Module):
+    def __init__(self, c, k=3, gc=8, shortcut=True):
+        super().__init__()
+        self.attn = DConv(c, c, k=k, e=0.8, gc=gc) # 8:0.9, 16:1.0
+        # self.attn = DCN(c, gc=gc)
+        self.ffn = nn.Sequential(Conv(c, c * 2, 1),
+                                 Conv(c * 2, c, 1, act=False))
+        self.add = shortcut
+
+    def forward(self, x):
+        x = x + self.attn(x) if self.add else self.attn(x)
+        x = x + self.ffn(x) if self.add else self.ffn(x)
+        return x
+    
+class C2PSDO(nn.Module):
+    def __init__(self, c1, c2, n=1, e=0.5, gc=8):
+        super().__init__()
+        assert c1 == c2
+        self.c = int(c1*e)//gc*gc
+        self.cv1 = Conv(c1, 2 * self.c, 1, 1)
+        self.cv2 = Conv(2 * self.c, c1, 1)
+
+        self.m = nn.Sequential(*(PSDBlockO(self.c, k=3, gc=gc) for _ in range(n)))
+
+    def forward(self, x):
+        a, b = self.cv1(x).split((self.c, self.c), dim=1)
+        b = self.m(b)
+        return self.cv2(torch.cat((a, b), 1))
+    
+class Star_org_block(nn.Module):
+    def __init__(self, ch):
+        super().__init__()
+
+        self.dw1 = Conv(ch, ch, 7, 1, autopad(7), g=ch, act=False)
+        self.pw1 = nn.Conv2d(ch, int(1.5*ch), 1)
+        self.pw2 = nn.Conv2d(ch, int(1.5*ch), 1)
+        self.act = nn.ReLU6()
+        self.pw3 = Conv(int(1.5*ch), ch, 1, act=False)
+        self.dw2 = nn.Conv2d(ch, ch, 7, 1, autopad(7), groups=ch)
+
+    def forward(self, x):
+        branch = x
+
+        x = self.dw1(x)
+        sub_x1 = self.pw1(x)
+        sub_x2 = self.act(self.pw2(x))
+        x = sub_x1 * sub_x2
+        x = self.pw3(x)
+        x = self.dw2(x)
+
+        return x + branch
+
+class Star_org(nn.Module):
+    def __init__(self, ch1, ch2, n=1):
+        super().__init__()
+
+        self.m = nn.Sequential(*(Star_org_block(ch1) for _ in range(n)))
+
+    def forward(self, x):
+        return self.m(x)
+        
+class Star_block(nn.Module):
+    def __init__(self, ch):
+        super().__init__()
+        # self.pw1 = nn.Conv2d(ch, ch, 1, 1, autopad(1))
+        # self.pw2 = nn.Conv2d(ch, ch, 1, 1, autopad(1))
+        self.pw1 = Conv(ch, ch, 1, 1, autopad(1), act=False)
+        self.pw2 = Conv(ch, ch, 1, 1, autopad(1), act=False)
+        self.act = nn.ReLU6()
+
+    def forward(self, x):
+        return self.pw1(x) * self.act(self.pw2(x))
+    
+class Star_(nn.Module):
+    def __init__(self, ch1, ch2, n=2):
+        super().__init__()
+        print(n)
+        self.m = nn.Sequential(*(Star_block(ch1) for _ in range(n)))
+
+    def forward(self, x):
+        return self.m(x)
