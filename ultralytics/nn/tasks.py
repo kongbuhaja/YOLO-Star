@@ -1247,13 +1247,14 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             args = [c1, c2, *args[1:]]
         elif m is CBFuse:
             c2 = ch[f[-1]]
-        elif m in [Star, Star2]:
+        elif m is Star:
             ch_ = [ch[x] for x in f]
             c2 = max(ch_)
-            if m is Star:
-                args = [ch_]
-            elif m is Star2:
-                args = [ch_, *args]
+            args = [ch_]
+        elif m is Star2:
+            ch_ = [ch[x] for x in f]
+            c2 = ch_[0] if args[-1] else ch_[-1] # args[-1] = reverse
+            args = [ch_, *args]
         elif m in frozenset({TorchVision, Index}):
             c2 = args[0]
             c1 = ch[f]

@@ -40,4 +40,4 @@ log_directory_check "$log_dir"
 
 # task runs/detect/star_-yolo11n3/weights/best.pt ./logs/val/star_-yolo11n3.log
 
-task runs/detect/star2-yolo12n2/weights/best.pt ./logs/val/star2-yolo12n.log
+task runs/detect/star2-yolo10n/weights/best.pt ./logs/val/star2-yolo10n.log
