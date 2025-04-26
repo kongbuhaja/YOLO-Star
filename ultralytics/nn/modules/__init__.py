@@ -90,6 +90,7 @@ from .conv import (
     DCN,
     Star,
     Star2,
+    Add,
 )
 from .head import OBB, Classify, Detect, Pose, RTDETRDecoder, Segment, WorldDetect, v10Detect
 from .transformer import (
@@ -192,5 +193,6 @@ __all__ = (
     "Star",
     "Star2",
     "Star_org",
-    "Star_"
+    "Star_",
+    "Add"
 )

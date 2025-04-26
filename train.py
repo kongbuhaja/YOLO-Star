@@ -6,7 +6,7 @@ parser.add_argument('--model', dest='model', type=str, default='yolov10n')
 parser.add_argument('--data', dest='data', type=str, default='coco')
 parser.add_argument('--gpus', dest='gpus', type=str, default='0', help='which device do you want to use')
 parser.add_argument('--cpus', dest='cpus', type=str, default='0-23', help='how many cores do you want to use')
-parser.add_argument('--epochs', dest='epochs', type=int, default=1000)
+parser.add_argument('--epochs', dest='epochs', type=int, default=800)
 
 args = parser.parse_args()
 
