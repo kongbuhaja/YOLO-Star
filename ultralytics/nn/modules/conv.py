@@ -811,6 +811,35 @@ class Add(nn.Module):
             y = layer(y) + xx
         return y
     
+class Add2(nn.Module):
+    def __init__(self, ch, layer='pw_conv', reverse=False):
+        super().__init__()
+        self.reverse = reverse
+        ch = ch[::-1] if self.reverse else ch
+
+        self.feature_size = min(ch)
+        # self.feature_size = int(np.mean(ch))
+
+        self.layers = []
+
+        for c in ch:
+            if layer.lower() == 'conv':
+                self.layers += [Conv(c, self.feature_size, 3, 1, autopad(3))]
+            elif layer.lower() == 'pw_conv':
+                self.layers += [Conv(c, self.feature_size, 1, 1, autopad(1))]
+            elif layer.lower() == 'gpw_conv':
+                self.layers += [Conv(c, self.feature_size, 3, 1, autopad(3), g=math.gcd(c, self.feature_size))]
+
+        self.layers = nn.ModuleList(self.layers)
+
+    def forward(self, x):
+        x = x[::-1] if self.reverse else x
+
+        y = self.layers[0](x[0])
+        for layer, xx in zip(self.layers[1:], x[1:]):
+            y += layer(xx)
+        return y
+    
 class WAdd(nn.Module):
     def __init__(self, ch, layer, reverse=False):
         super().__init__()

@@ -77,6 +77,8 @@ from ultralytics.nn.modules import (
     Star_org,
     Star_,
     Add,
+    Add2,
+
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
 from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
@@ -1252,9 +1254,11 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             ch_ = [ch[x] for x in f]
             c2 = max(ch_)
             args = [ch_]
-        elif m in [Star2, Add]:
+        elif m in [Star2, Add, Add2]:
             ch_ = [ch[x] for x in f]
             c2 = ch_[0] if args[-1] else ch_[-1] # args[-1] = reverse
+            if m == Add2:
+                c2 = min(ch_)
             args = [ch_, *args]
 
         # elif m in [Star, Star2]:
