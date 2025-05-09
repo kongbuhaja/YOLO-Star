@@ -853,7 +853,6 @@ class WAdd(nn.Module):
         for c1, c2, in ch_:
             if layer.lower() == 'conv':
                 self.layers += [Conv(c1, c2, 3, 1, autopad(3))]
-                self.w
             elif layer.lower() == 'pw_conv':
                 self.layers += [Conv(c1, c2, 1, 1, autopad(1))]
             elif layer.lower() == 'gpw_conv':

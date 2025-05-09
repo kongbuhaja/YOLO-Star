@@ -24,25 +24,40 @@ task() {
 log_dir="./logs/val"
 log_directory_check "$log_dir"
 
-# task yolov8n.pt ./logs/val/yolo8n.log
-# task yolov10n.pt ./logs/val/yolo10n.log
-# task yolo11n.pt ./logs/val/yolo11n.log
-# task yolo12n.pt ./logs/val/yolo12n.log
+dir='val'
+#origin
+# task yolov8n.pt ./logs/$dir/yolo8n.log
+# task yolov10n.pt ./logs/$dir/yolo10n.log
+# task yolo11n.pt ./logs/$dir/yolo11n.log
+# task yolo12n.pt ./logs/$dir/yolo12n.log
+#up
+# task runs/detect/star2_up-yolo8n_1000/weights/best.pt ./logs/$dir/star2_up-yolo8n_1000.log #old
+# task runs/detect/star2_up-yolo10n_1000/weights/best.pt ./logs/$dir/star2_up-yolo10n_1000.log #old
+task runs/detect/star2_up-yolo11n_1000/weights/best.pt ./logs/$dir/star2_up-yolo11n_1000.log
+# task runs/detect/star2_up-yolo12n_1000/weights/best.pt ./logs/$dir/star2_up-yolo12n_1000.log #old
+#du
+## task runs/detect/star2_du-yolo8n_1000/weights/best.pt ./logs/$dir/star2_du-yolo8n_1000.log
+## task runs/detect/star2_du-yolo10n_1000/weights/best.pt ./logs/$dir/star2_du-yolo10n_1000.log
+# task runs/detect/star2_du-yolo11n_1000/weights/best.pt ./logs/$dir/star2_du-yolo11n_1000.log
+## task runs/detect/star2_du-yolo12n_1000/weights/best.pt ./logs/$dir/star2_du-yolo12n_1000.log
+#ud
+## task runs/detect/star2_ud-yolo8n_1000/weights/best.pt ./logs/$dir/star2_ud-yolo8n_1000.log
+## task runs/detect/star2_ud-yolo10n_1000/weights/best.pt ./logs/$dir/star2_ud-yolo10n_1000.log
+## task runs/detect/star2_ud-yolo11n_1000/weights/best.pt ./logs/$dir/star2_ud-yolo11n_1000.log
+## task runs/detect/star2_ud-yolo12n_1000/weights/best.pt ./logs/$dir/star2_ud-yolo12n_1000.log
+#down
+## task runs/detect/star2_down-yolo8n_1000/weights/best.pt ./logs/$dir/star2_down-yolo8n_1000.log
+## task runs/detect/star2_down-yolo10n_1000/weights/best.pt ./logs/$dir/star2_down-yolo10n_1000.log
+# task runs/detect/star2_down-yolo11n_1000/weights/best.pt ./logs/$dir/star2_down-yolo11n_1000.log
+## task runs/detect/star2_down-yolo12n_1000/weights/best.pt ./logs/$dir/star2_down-yolo12n_1000.log
+#epoch
+# task runs/detect/star2_du-yolo11n_600/weights/best.pt ./logs/$dir/star2_du-yolo11n_600.log
+# task runs/detect/star2_du-yolo11n_800/weights/best.pt ./logs/$dir/star2_du-yolo11n_800.log
+# task runs/detect/star2_du-yolo11n_1000/weights/best.pt ./logs/$dir/star2_du-yolo11n_1000.log
 
+# task runs/detect/star2_ud-yolo11n_600/weights/best.pt ./logs/$dir/star2_ud-yolo11n_600.log
+# task runs/detect/star2_ud-yolo11n_800/weights/best.pt ./logs/$dir/star2_ud-yolo11n_800.log
+# task runs/detect/star2_ud-yolo11n_1000/weights/best.pt ./logs/$dir/star2_ud-yolo11n_1000.log
 
-# task runs/detect/psd-yolo10n/weights/best.pt ./logs/val/psd-yolo10n.log
-# task runs/detect/c2psd-yolo11n/weights/best.pt ./logs/val/c2psd-yolo11n.log
-
-# task runs/detect/star2-yolo11n/weights/best.pt ./logs/val/star2-yolo11n.log
-
-# task runs/detect/star_-yolo11n/weights/best.pt ./logs/val/star_-yolo11n.log
-# task runs/detect/star_org-yolo11n/weights/best.pt ./logs/val/star_org-yolo11n.log
-
-# task runs/detect/star_-yolo11n3/weights/best.pt ./logs/val/star_-yolo11n3.log
-
-# task runs/detect/star2-yolo10n/weights/best.pt ./logs/val/star2-yolo10n.log
-# task runs/detect/star2-yolo8n/weights/best.pt ./logs/val/star2-yolo8n.log
-
-
-task runs/detect/star2-yolo11n_up/weights/best.pt ./logs/val/star2-yolo11n_up.log
-# task runs/detect/star2-yolo11n_down/weights/best.pt ./logs/val/star2-yolo11n_down.log
+# task runs/detect/star2_down-yolo11n_800/weights/best.pt ./logs/$dir/star2_down-yolo11n_800.log
+# task runs/detect/star2_down-yolo11n_1000/weights/best.pt ./logs/$dir/star2_down-yolo11n_1000.log
