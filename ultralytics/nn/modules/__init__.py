@@ -93,7 +93,7 @@ from .conv import (
     Add,
     Add2
 )
-from .head import OBB, Classify, Detect, Pose, RTDETRDecoder, Segment, WorldDetect, v10Detect
+from .head import OBB, Classify, Detect, Pose, RTDETRDecoder, Segment, WorldDetect, v10Detect, Detect2
 from .transformer import (
     AIFI,
     MLP,
@@ -197,4 +197,6 @@ __all__ = (
     "Star_",
     "Add",
     "Add2"
+
+    "Detect2"
 )
