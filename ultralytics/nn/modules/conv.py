@@ -7,8 +7,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from DCNv4 import DCNv4
-
 __all__ = (
     "Conv",
     "Conv2",
@@ -24,7 +22,6 @@ __all__ = (
     "Concat",
     "RepConv",
     "Index",
-    "DConv",
 )
 
 
@@ -715,32 +712,7 @@ class Index(nn.Module):
             (torch.Tensor): Selected tensor.
         """
         return x[self.index]
-
-class DConv(nn.Module):
-    def __init__(self, c1, c2, k=3, s=1, p=None, g=1, d=1, gc=8, dk=3, act=True, e=1.0):
-        super().__init__()
-        assert k==3
-        c = int(c1 * e)//gc*gc
-        self.cv1 = Conv(c1, c, 1, 1, act=False)
-        # self.cv1 = nn.Conv2d(c1, c, 1, 1)
-        self.conv = DCN(c, k, s, autopad(k, p, d), d, dk=dk, gc=gc)
-        # self.conv = DCNv4(c, k, s, autopad(k, p, d), group=dg, dw_kernel_size=dk, without_pointwise=False, output_bias=False)
-        self.cv2 = Conv(c, c2, 1, 1)
-
-    def forward(self, x):
-        return self.cv2(self.conv(self.cv1(x)))
     
-class DCN(nn.Module):
-    default_act = nn.SiLU()
-
-    def __init__(self, c, k=3, s=1, p=None, d=1, gc=8, dk=3, act=True):
-        super().__init__()
-        assert k==3
-        self.conv = DCNv4(c, k, s, autopad(k, p, d), group=c//gc, dw_kernel_size=dk, without_pointwise=False, output_bias=False)
-
-    def forward(self, x):
-        """Apply convolution, batch normalization and activation to input tensor."""
-        return self.conv(x)
     
 class Star(nn.Module):
     def __init__(self, ch):
@@ -758,7 +730,7 @@ class Star(nn.Module):
         return y
     
 class Star2(nn.Module):
-    def __init__(self, ch, layer, reverse=False):
+    def __init__(self, ch, layer='pw_conv', reverse=False):
         super().__init__()
         self.reverse = reverse
         ch = ch[::-1] if self.reverse else ch
@@ -783,9 +755,40 @@ class Star2(nn.Module):
         for layer, xx in zip(self.layers, x[1:]):
             y = layer(y) * xx
         return y
+
+#two-layer
+class Star3(nn.Module):
+    def __init__(self, ch, layer='pw_conv', reverse=False):
+        super().__init__()
+        self.reverse = reverse
+        ch = ch[::-1] if self.reverse else ch
+
+        self.feature_size = min(ch)
+        # self.feature_size = int(np.mean(ch))
+
+        self.layers = []
+
+        for c in ch:
+            if layer.lower() == 'conv':
+                self.layers += [Conv(c, self.feature_size, 3, 1, autopad(3))]
+            elif layer.lower() == 'pw_conv':
+                self.layers += [Conv(c, self.feature_size, 1, 1, autopad(1))]
+            elif layer.lower() == 'gpw_conv':
+                self.layers += [Conv(c, self.feature_size, 3, 1, autopad(3), g=math.gcd(c, self.feature_size))]
+
+        self.layers = nn.ModuleList(self.layers)
+
+
+    def forward(self, x):
+        x = x[::-1] if self.reverse else x
+
+        y = self.layers[0](x[0])
+        for layer, xx in zip(self.layers[1:], x[1:]):
+            y *= layer(xx)
+        return y
     
 class Add(nn.Module):
-    def __init__(self, ch, layer, reverse=False):
+    def __init__(self, ch, layer='pw_conv', reverse=False):
         super().__init__()
         self.reverse = reverse
         ch = ch[::-1] if self.reverse else ch
@@ -811,6 +814,7 @@ class Add(nn.Module):
             y = layer(y) + xx
         return y
     
+#two-layer
 class Add2(nn.Module):
     def __init__(self, ch, layer='pw_conv', reverse=False):
         super().__init__()
@@ -841,7 +845,7 @@ class Add2(nn.Module):
         return y
     
 class WAdd(nn.Module):
-    def __init__(self, ch, layer, reverse=False):
+    def __init__(self, ch, layer='pw_conv', reverse=False):
         super().__init__()
         self.reverse = reverse
         ch = ch[::-1] if self.reverse else ch

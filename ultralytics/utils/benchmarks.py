@@ -173,7 +173,7 @@ def benchmark(
             )
             metric, speed = results.results_dict[key], results.speed["inference"]
             fps = round(1000 / (speed + eps), 2)  # frames per second
-            y.append([name, "✅", round(file_size(filename), 1), round(metric, 4), round(speed, 2), fps])
+            y.append([name, "✅", round(file_size(filename), 1), round(metric, 4), round(speed, 4), fps])
         except Exception as e:
             if verbose:
                 assert type(e) is AssertionError, f"Benchmark failure for {name}: {e}"

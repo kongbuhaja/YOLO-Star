@@ -15,28 +15,7 @@ from .conv import Conv, DWConv
 from .transformer import MLP, DeformableTransformerDecoder, DeformableTransformerDecoderLayer
 from .utils import bias_init_with_prob, linear_init
 
-__all__ = "Detect", "Segment", "Pose", "Classify", "OBB", "RTDETRDecoder", "v10Detect"
-
-class Detect2(Detect):
-    def __init__(self, nc=80, ch=()):
-        super.init__(nc, ch)
-        c2, c3 = max((16, ch[0] // 4, self.reg_max * 4)), max(ch[0], min(self.nc, 100))  # channels
-
-        self.cv2 = nn.ModuleList(
-            nn.Sequential(DWConv(x, c2, 3), Conv(c2, c2, 3), nn.Conv2d(c2, 4 * self.reg_max, 1)) for x in ch
-        )
-        self.cv3 = (
-            nn.ModuleList(nn.Sequential(DWConv(x, c3, 3), Conv(c3, c3, 3), nn.Conv2d(c3, self.nc, 1)) for x in ch)
-            if self.legacy
-            else nn.ModuleList(
-                nn.Sequential(
-                    nn.Sequential(DWConv(x, x, 3), Conv(x, c3, 1)),
-                    nn.Sequential(DWConv(c3, c3, 3), Conv(c3, c3, 1)),
-                    nn.Conv2d(c3, self.nc, 1),
-                )
-                for x in ch
-            )
-        )
+__all__ = "Detect", "Segment", "Pose", "Classify", "OBB", "RTDETRDecoder", "v10Detect, Detect2"
 
 class Detect(nn.Module):
     """YOLO Detect head for detection models."""
@@ -191,6 +170,26 @@ class Detect(nn.Module):
         i = torch.arange(batch_size)[..., None]  # batch indices
         return torch.cat([boxes[i, index // nc], scores[..., None], (index % nc)[..., None].float()], dim=-1)
 
+class Detect2(Detect):
+    def __init__(self, nc=80, ch=()):
+        super.init__(nc, ch)
+        c2, c3 = max((16, ch[0] // 4, self.reg_max * 4)), max(ch[0], min(self.nc, 100))  # channels
+
+        self.cv2 = nn.ModuleList(
+            nn.Sequential(DWConv(x, c2, 3), Conv(c2, c2, 3), nn.Conv2d(c2, 4 * self.reg_max, 1)) for x in ch
+        )
+        self.cv3 = (
+            nn.ModuleList(nn.Sequential(DWConv(x, c3, 3), Conv(c3, c3, 3), nn.Conv2d(c3, self.nc, 1)) for x in ch)
+            if self.legacy
+            else nn.ModuleList(
+                nn.Sequential(
+                    nn.Sequential(DWConv(x, x, 3), Conv(x, c3, 1)),
+                    nn.Sequential(DWConv(c3, c3, 3), Conv(c3, c3, 1)),
+                    nn.Conv2d(c3, self.nc, 1),
+                )
+                for x in ch
+            )
+        )
 
 class Segment(Detect):
     """YOLO Segment head for segmentation models."""

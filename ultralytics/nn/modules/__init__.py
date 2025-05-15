@@ -58,17 +58,6 @@ from .block import (
     ResNetLayer,
     SCDown,
     TorchVision,
-
-    DC2f,
-    DC3k2,
-    PSD,
-    C2PSD,
-    C2PSDO,
-    DC3k2O,
-    DC3k2D,
-    DC3k2T,
-    Star_org,
-    Star_
 )
 from .conv import (
     CBAM,
@@ -86,10 +75,9 @@ from .conv import (
     RepConv,
     SpatialAttention,
 
-    DConv,
-    DCN,
     Star,
     Star2,
+    Star3,
     Add,
     Add2
 )
@@ -181,20 +169,9 @@ __all__ = (
     "Index",
     "A2C2f",
 
-    "DConv",
-    "DC2f",
-    "PSD",
-    "C2PSD",
-    "DC3k2",
-    "DCN",
-    "C2PSDO",
-    "DC3k2O",
-    "DC3k2D",
-    "DC3k2T",
     "Star",
     "Star2",
-    "Star_org",
-    "Star_",
+    "Star3",
     "Add",
     "Add2"
 
