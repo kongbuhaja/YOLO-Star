@@ -1,5 +1,6 @@
 import os, argparse, psutil
 import numpy as np
+from ultralytics.utils.benchmarks import benchmark
 
 parser = argparse.ArgumentParser(description='DYOLO')
 parser.add_argument('--model', dest='model', type=str, default='yolov10n')
@@ -17,6 +18,7 @@ p.cpu_affinity(list(range(cores[0], cores[1]+1)))
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
 
 from ultralytics import YOLO
+from ultralytics.utils.benchmarks import benchmark
 import torch 
 
 if torch.cuda.is_available():
@@ -31,17 +33,13 @@ else:
 model_file = args.model if '.pt' in args.model else f'{args.model}.yaml'
 model = YOLO(f"{model_file}")
 
-times = []
+values = []
 for _ in range(args.n):
-    results = model.val(data = f'{args.data}.yaml')
-    times += [[results.speed['preprocess'], results.speed['inference'], results.speed['postprocess'],
-              sum([results.speed['preprocess'], results.speed['inference'], results.speed['postprocess']])]]
+    trt = model.benchmark(data=f'{args.data}.yaml', format='engine', half=True, imgsz=640, device=0)
+    values += [trt.values[0][3:]]
+values = np.array(sorted(values, key=lambda x : x[1])[1:-1]).T
 
-times = np.array(sorted(times, key=lambda x : x[-1])[1:-1]).T
-
-model.info(verbose=1)
-print(f"avg pre-processing time: {np.mean(times[0]):.4f} ms")
-print(f"avg inference time: {np.mean(times[1]):.4f} ms")
-print(f"avg post-processing time: {np.mean(times[2]):.4f} ms")
-print(f"avg total time: {np.mean(times[3]):.4f}")
-print(f"FPS: {1000/np.mean(times[3]):.2f}")
+model.val(data = f'{args.data}.yaml')
+print(f"avg trt mAP: {np.mean(values[0]):.4f}")
+print(f"avg inference time: {np.mean(values[1]):.4f} ms")
+print(f"avg FPS: {np.mean(values[2]):.2f}")
