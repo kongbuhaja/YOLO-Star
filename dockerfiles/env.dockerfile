@@ -21,7 +21,8 @@ RUN apt-get update && \
         curl dpkg libgtk2.0-dev cmake libwebp-dev ca-certificates gnupg \
         libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev \
         libatlas-base-dev gfortran \
-        libgl1-mesa-glx libglu1-mesa-dev x11-utils x11-apps && \
+        libgl1-mesa-glx libglu1-mesa-dev x11-utils x11-apps \
+        zip sysstat lm-sensors && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
