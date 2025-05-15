@@ -68,3 +68,6 @@ dir='val'
 
 # task runs/detect/star2_down-yolo11n_800/weights/best.pt ./logs/$dir/star2_down-yolo11n_800.log
 # task runs/detect/star2_down-yolo11n_1000/weights/best.pt ./logs/$dir/star2_down-yolo11n_1000.log
+
+#PAN
+task runs/detect/PAN_add-yolo11n_1000/weights/best.pt ./logs/$dir/PAN_add-yolo11n_1000.log
