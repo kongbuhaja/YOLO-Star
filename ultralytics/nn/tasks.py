@@ -1231,7 +1231,7 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             ch_ = [ch[x] for x in f]
             c2 = ch_[0] if args[-1] else ch_[-1] # args[-1] = reverse
             if m in [Star3, Add2]:
-                c2 = min(ch_)
+                c2 = m.get_feature_size(ch_)
             args = [ch_, *args]
 
         # elif m in [Star, Star2]:

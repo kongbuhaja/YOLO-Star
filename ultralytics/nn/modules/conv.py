@@ -762,9 +762,9 @@ class Star3(nn.Module):
         super().__init__()
         self.reverse = reverse
         ch = ch[::-1] if self.reverse else ch
-
-        self.feature_size = min(ch)
-        # self.feature_size = int(np.mean(ch))
+        
+        # self.feature_size = min(ch)
+        self.feature_size = self.get_feature_size(ch)
 
         self.layers = []
 
@@ -778,6 +778,9 @@ class Star3(nn.Module):
 
         self.layers = nn.ModuleList(self.layers)
 
+    @staticmethod
+    def get_feature_size(ch):
+        return int(max(ch))
 
     def forward(self, x):
         x = x[::-1] if self.reverse else x
@@ -821,8 +824,7 @@ class Add2(nn.Module):
         self.reverse = reverse
         ch = ch[::-1] if self.reverse else ch
 
-        self.feature_size = min(ch)
-        # self.feature_size = int(np.mean(ch))
+        self.feature_size = self.get_feature_size(ch)
 
         self.layers = []
 
@@ -835,6 +837,10 @@ class Add2(nn.Module):
                 self.layers += [Conv(c, self.feature_size, 3, 1, autopad(3), g=math.gcd(c, self.feature_size))]
 
         self.layers = nn.ModuleList(self.layers)
+
+    @staticmethod
+    def get_feature_size(ch):
+        return int(min(ch))
 
     def forward(self, x):
         x = x[::-1] if self.reverse else x
