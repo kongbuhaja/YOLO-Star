@@ -54,4 +54,6 @@ log_directory_check "$log_dir"
 # task star2_ud-yolo11n "0-23" 0 "$log_dir"
 # task star2_down-yolo11n "0-23" 0 "$log_dir"
 
-task star3_up-yolo11n "0-23" 0 "$log_dir"
+# task star3_up-yolo11n "0-23" 0 "$log_dir"
+# task BiFPN_wadd-yolo11n "0-23" 0 "$log_dir"
+task star2_up-yolo11x "0-23" 0 "$log_dir"
