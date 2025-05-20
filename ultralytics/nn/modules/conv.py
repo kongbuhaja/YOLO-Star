@@ -857,6 +857,7 @@ class WAdd(nn.Module):
         ch = ch[::-1] if self.reverse else ch
 
         ch_ = [[ch[i], ch[i+1]] for i in range(len(ch)-1)]
+        self.ch_= ch_
         
         self.layers = []
         self.ws = []
@@ -867,8 +868,9 @@ class WAdd(nn.Module):
                 self.layers += [Conv(c1, c2, 1, 1, autopad(1))]
             elif layer.lower() == 'gpw_conv':
                 self.layers += [Conv(c1, c2, 1, 1, autopad(1), g=math.gcd(c1, c2))]
-            self.ws += [[nn.Parameter(torch.Tensor(c2, 1, 1))]*2]
+            self.ws += [nn.ParameterList([nn.Parameter(torch.ones(c2, 1, 1))]*2)]
         self.layers = nn.ModuleList(self.layers)
+        self.ws = nn.ParameterList(self.ws)
 
 
     def forward(self, x):
