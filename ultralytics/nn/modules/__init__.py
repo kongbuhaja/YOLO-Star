@@ -81,6 +81,7 @@ from .conv import (
     Add,
     Add2,
     WAdd,
+    WAdd2
 )
 from .head import OBB, Classify, Detect, Pose, RTDETRDecoder, Segment, WorldDetect, v10Detect, Detect2
 from .transformer import (
@@ -176,6 +177,7 @@ __all__ = (
     "Add",
     "Add2",
     "WAdd",
+    "WAdd2"
 
     "Detect2"
 )

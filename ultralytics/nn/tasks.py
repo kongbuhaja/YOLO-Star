@@ -70,6 +70,7 @@ from ultralytics.nn.modules import (
     Add,
     Add2,
     WAdd,
+    WAdd2,
 
     Detect2
 
@@ -1227,7 +1228,7 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             ch_ = [ch[x] for x in f]
             c2 = max(ch_)
             args = [ch_]
-        elif m in [Star2, Star3, Add, Add2, WAdd]:
+        elif m in [Star2, Star3, Add, Add2, WAdd, WAdd2]:
             ch_ = [ch[x] for x in f]
             c2 = ch_[0] if args[-1] else ch_[-1] # args[-1] = reverse
             if m in [Star3, Add2]:

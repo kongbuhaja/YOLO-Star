@@ -764,17 +764,17 @@ class Star3(nn.Module):
         ch = ch[::-1] if self.reverse else ch
         
         # self.feature_size = min(ch)
-        self.feature_size = self.get_feature_size(ch)
+        feature_size = self.get_feature_size(ch)
 
         self.layers = []
 
         for c in ch:
             if layer.lower() == 'conv':
-                self.layers += [Conv(c, self.feature_size, 3, 1, autopad(3))]
+                self.layers += [Conv(c, feature_size, 3, 1, autopad(3))]
             elif layer.lower() == 'pw_conv':
-                self.layers += [Conv(c, self.feature_size, 1, 1, autopad(1))]
+                self.layers += [Conv(c, feature_size, 1, 1, autopad(1))]
             elif layer.lower() == 'gpw_conv':
-                self.layers += [Conv(c, self.feature_size, 3, 1, autopad(3), g=math.gcd(c, self.feature_size))]
+                self.layers += [Conv(c, feature_size, 3, 1, autopad(3), g=math.gcd(c, feature_size))]
 
         self.layers = nn.ModuleList(self.layers)
 
@@ -824,17 +824,17 @@ class Add2(nn.Module):
         self.reverse = reverse
         ch = ch[::-1] if self.reverse else ch
 
-        self.feature_size = self.get_feature_size(ch)
+        feature_size = self.get_feature_size(ch)
 
         self.layers = []
 
         for c in ch:
             if layer.lower() == 'conv':
-                self.layers += [Conv(c, self.feature_size, 3, 1, autopad(3))]
+                self.layers += [Conv(c, feature_size, 3, 1, autopad(3))]
             elif layer.lower() == 'pw_conv':
-                self.layers += [Conv(c, self.feature_size, 1, 1, autopad(1))]
+                self.layers += [Conv(c, feature_size, 1, 1, autopad(1))]
             elif layer.lower() == 'gpw_conv':
-                self.layers += [Conv(c, self.feature_size, 3, 1, autopad(3), g=math.gcd(c, self.feature_size))]
+                self.layers += [Conv(c, feature_size, 3, 1, autopad(3), g=math.gcd(c, feature_size))]
 
         self.layers = nn.ModuleList(self.layers)
 
@@ -879,6 +879,41 @@ class WAdd(nn.Module):
         y = x[0]
         for layer, (w1, w2), xx in zip(self.layers, self.ws, x[1:]):
             y = w1*layer(y) + w2*xx
+        return y
+    
+# two-layers
+class WAdd2(nn.Module):
+    def __init__(self, ch, layer='pw_conv', reverse=False):
+        super().__init__()
+        self.reverse = reverse
+        ch = ch[::-1] if self.reverse else ch
+
+        feature_size = self.get_feature_size(ch)
+        
+        self.layers = []
+        self.ws = []
+        for c in ch:
+            if layer.lower() == 'conv':
+                self.layers += [Conv(c, feature_size, 3, 1, autopad(3))]
+            elif layer.lower() == 'pw_conv':
+                self.layers += [Conv(c, feature_size, 1, 1, autopad(1))]
+            elif layer.lower() == 'gpw_conv':
+                self.layers += [Conv(c, feature_size, 1, 1, autopad(1), g=math.gcd(c, feature_size))]
+            self.ws += [nn.Parameter(torch.ones(feature_size, 1, 1))]
+        self.layers = nn.ModuleList(self.layers)
+        self.ws = nn.ParameterList(self.ws)
+
+    @staticmethod
+    def get_feature_size(ch):
+        return int(min(ch))
+
+    def forward(self, x):
+        x = x[::-1] if self.reverse else x
+
+        y = self.ws[0] * self.layers[0](x[0])
+        for w, layer, xx in zip(self.ws[1:], self.layers[1:], x[1:]):
+            y += w * layer(xx)
+
         return y
     
 # class Star2(nn.Module):
