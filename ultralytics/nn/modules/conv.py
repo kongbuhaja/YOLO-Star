@@ -780,7 +780,7 @@ class Star3(nn.Module):
 
     @staticmethod
     def get_feature_size(ch):
-        return int(max(ch))
+        return int(min(ch))
 
     def forward(self, x):
         x = x[::-1] if self.reverse else x
