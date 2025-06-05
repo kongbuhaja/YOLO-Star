@@ -172,7 +172,7 @@ class Detect(nn.Module):
 
 class Detect2(Detect):
     def __init__(self, nc=80, ch=()):
-        super.init__(nc, ch)
+        super().__init__(nc, ch)
         c2, c3 = max((16, ch[0] // 4, self.reg_max * 4)), max(ch[0], min(self.nc, 100))  # channels
 
         self.cv2 = nn.ModuleList(
