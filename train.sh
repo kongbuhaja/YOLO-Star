@@ -64,7 +64,7 @@ log_directory_check "$log_dir"
 # task star2_up-yolo11s "0-23" 0 "$log_dir"
 
 
-task star_up-yolo8n "0-23" 0 1000 "$log_dir"
-# task star2_up-yolo10n "0-23" 0 600 "$log_dir"
-# task star2_up-yolo11n "0-23" 0 600 "$log_dir"
-# task star2_up-yolo12n "0-23" 0 600 "$log_dir"
+# task star_up-yolo8n "0-23" 0 1000 "$log_dir"
+task star_up-yolo10n "0-23" 0 1000 "$log_dir"
+task star_up-yolo11n "0-23" 0 1000 "$log_dir"
+task star_up-yolo12n "0-23" 0 1000 "$log_dir"
