@@ -714,27 +714,24 @@ class Index(nn.Module):
         return x[self.index]
     
     
-class Star(nn.Module):
-    def __init__(self, ch):
-        super().__init__()
-        self.ascending = ch[0] <= ch[-1]
+# class Star(nn.Module):
+#     def __init__(self, ch):
+#         super().__init__()
+#         self.ascending = ch[0] <= ch[-1]
 
-    def forward(self, x):
-        x = x if self.ascending else x[::-1]
+#     def forward(self, x):
+#         x = x if self.ascending else x[::-1]
 
-        y = x[0]
-        for xx in x[1:]:
-            yc = y.shape[1]
-            xxc = xx.shape[1]
-            y = y.repeat([1, xxc//yc, 1, 1]) * xx
-        return y
+#         y = x[0]
+#         for xx in x[1:]:
+#             yc = y.shape[1]
+#             xxc = xx.shape[1]
+#             y = y.repeat([1, xxc//yc, 1, 1]) * xx
+#         return y
     
-class Star2(nn.Module):
-    def __init__(self, ch, layer='pw_conv', reverse=False):
+class Star(nn.Module):
+    def __init__(self, ch, layer='pw_conv'):
         super().__init__()
-        self.reverse = reverse
-        ch = ch[::-1] if self.reverse else ch
-
         ch_ = [[ch[i], ch[i+1]] for i in range(len(ch)-1)]
         
         self.layers = []
@@ -749,15 +746,13 @@ class Star2(nn.Module):
 
 
     def forward(self, x):
-        x = x[::-1] if self.reverse else x
-
         y = x[0]
         for layer, xx in zip(self.layers, x[1:]):
             y = layer(y) * xx
         return y
 
 #two-layer
-class Star3(nn.Module):
+class Star2(nn.Module):
     def __init__(self, ch, layer='pw_conv', reverse=False):
         super().__init__()
         self.reverse = reverse

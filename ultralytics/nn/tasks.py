@@ -66,7 +66,7 @@ from ultralytics.nn.modules import (
     
     Star,
     Star2,
-    Star3,
+    # Star3,
     Add,
     Add2,
     WAdd,
@@ -1228,20 +1228,12 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             ch_ = [ch[x] for x in f]
             c2 = max(ch_)
             args = [ch_]
-        elif m in [Star2, Star3, Add, Add2, WAdd, WAdd2]:
+        elif m in [Star, Add, Add2, WAdd, WAdd2]:
             ch_ = [ch[x] for x in f]
             c2 = ch_[0] if args[-1] else ch_[-1] # args[-1] = reverse
-            if m in [Star3, Add2, WAdd2]:
+            if m in [Star2, Add2, WAdd2]:
                 c2 = m.get_feature_size(ch_)
             args = [ch_, *args]
-
-        # elif m in [Star, Star2]:
-        #      ch_ = [ch[x] for x in f]
-        #      c2 = max(ch_)
-        #      if m is Star:
-        #          args = [ch_]
-        #      elif m is Star2:
-        #          args = [ch_, *args]
 
         elif m in frozenset({TorchVision, Index}):
             c2 = args[0]

@@ -77,7 +77,7 @@ from .conv import (
 
     Star,
     Star2,
-    Star3,
+    # Star3,
     Add,
     Add2,
     WAdd,
@@ -173,7 +173,7 @@ __all__ = (
 
     "Star",
     "Star2",
-    "Star3",
+    # "Star3",
     "Add",
     "Add2",
     "WAdd",
