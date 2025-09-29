@@ -11,10 +11,11 @@ start_background_task() {
     local model=$1
     local cpus=$2
     local gpus=$3
-    local log_dir=$4
+    local epochs=$4
+    local log_dir=$5
 
     echo "Training for $1 has begun."
-    nohup python3 train.py --model "$model" --cpus "$cpus" --gpus "$gpus" > "$log_dir/$model.log" 2>&1 &
+    nohup python3 train.py --model "$model" --cpus "$cpus" --gpus "$gpus" --epochs "$epochs" > "$log_dir/$model.log" 2>&1 &
     sleep 10
 }
 
@@ -22,8 +23,9 @@ wait_for_completion() {
     local model=$1
     local cpus=$2
     local gpus=$3
+    local epochs=$4
 
-    while pgrep -f "python3 train.py --model $model --cpus $cpus --gpus $gpus" > /dev/null; do
+    while pgrep -f "python3 train.py --model $model --cpus $cpus --gpus $gpus --epochs $epochs" > /dev/null; do
         sleep 30
     done
     echo "Training for $model has completed."
@@ -31,8 +33,8 @@ wait_for_completion() {
 }
 
 task() {
-    start_background_task "$1" "$2" "$3" "$4"
-    wait_for_completion "$1" "$2" "$3"
+    start_background_task "$1" "$2" "$3" "$4" "$5"
+    wait_for_completion "$1" "$2" "$3" "$4"
 }
 
 log_dir="./logs"
@@ -49,11 +51,20 @@ log_directory_check "$log_dir"
 # task star2-yolo10n "0-23" 0 "$log_dir"
 # task star2-yolo8n "0-23" 0 "$log_dir"
 
-# task star2_up-yolo11n "0-23" 0 "$log_dir" # 기존
+# task star2_up-yolo11n "0-23" 0 "$log_dir"
 # task star2_du-yolo11n "0-23" 0 "$log_dir" 
 # task star2_ud-yolo11n "0-23" 0 "$log_dir"
 # task star2_down-yolo11n "0-23" 0 "$log_dir"
 
 # task star3_up-yolo11n "0-23" 0 "$log_dir"
 # task BiFPN_wadd-yolo11n "0-23" 0 "$log_dir"
-task star2_up-yolo11x "0-23" 0 "$log_dir"
+# task star2_up-yolo11x "0-23" 0 "$log_dir"
+# task yolo11s "0-23" 0 1000 "$log_dir" 
+# task yolo12s "0-23" 0 600 "$log_dir"
+# task star2_up-yolo11s "0-23" 0 "$log_dir"
+
+
+task star_up-yolo8n "0-23" 0 1000 "$log_dir"
+# task star2_up-yolo10n "0-23" 0 600 "$log_dir"
+# task star2_up-yolo11n "0-23" 0 600 "$log_dir"
+# task star2_up-yolo12n "0-23" 0 600 "$log_dir"
