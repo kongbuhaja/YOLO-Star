@@ -753,10 +753,8 @@ class Star(nn.Module):
 
 #two-layer
 class Star2(nn.Module):
-    def __init__(self, ch, layer='pw_conv', reverse=False):
+    def __init__(self, ch, layer='pw_conv'):
         super().__init__()
-        self.reverse = reverse
-        ch = ch[::-1] if self.reverse else ch
         
         # self.feature_size = min(ch)
         feature_size = self.get_feature_size(ch)
@@ -778,18 +776,14 @@ class Star2(nn.Module):
         return int(min(ch))
 
     def forward(self, x):
-        x = x[::-1] if self.reverse else x
-
         y = self.layers[0](x[0])
         for layer, xx in zip(self.layers[1:], x[1:]):
             y *= layer(xx)
         return y
     
 class Add(nn.Module):
-    def __init__(self, ch, layer='pw_conv', reverse=False):
+    def __init__(self, ch, layer='pw_conv'):
         super().__init__()
-        self.reverse = reverse
-        ch = ch[::-1] if self.reverse else ch
 
         ch_ = [[ch[i], ch[i+1]] for i in range(len(ch)-1)]
         
@@ -805,8 +799,6 @@ class Add(nn.Module):
 
 
     def forward(self, x):
-        x = x[::-1] if self.reverse else x
-
         y = x[0]
         for layer, xx in zip(self.layers, x[1:]):
             y = layer(y) + xx
@@ -814,11 +806,8 @@ class Add(nn.Module):
     
 #two-layer
 class Add2(nn.Module):
-    def __init__(self, ch, layer='pw_conv', reverse=False):
+    def __init__(self, ch, layer='pw_conv'):
         super().__init__()
-        self.reverse = reverse
-        ch = ch[::-1] if self.reverse else ch
-
         feature_size = self.get_feature_size(ch)
 
         self.layers = []
@@ -838,18 +827,14 @@ class Add2(nn.Module):
         return int(min(ch))
 
     def forward(self, x):
-        x = x[::-1] if self.reverse else x
-
         y = self.layers[0](x[0])
         for layer, xx in zip(self.layers[1:], x[1:]):
             y += layer(xx)
         return y
     
 class WAdd(nn.Module):
-    def __init__(self, ch, layer='pw_conv', reverse=False):
+    def __init__(self, ch, layer='pw_conv'):
         super().__init__()
-        self.reverse = reverse
-        ch = ch[::-1] if self.reverse else ch
 
         ch_ = [[ch[i], ch[i+1]] for i in range(len(ch)-1)]
         self.ch_= ch_
@@ -869,8 +854,6 @@ class WAdd(nn.Module):
 
 
     def forward(self, x):
-        x = x[::-1] if self.reverse else x
-
         y = x[0]
         for layer, (w1, w2), xx in zip(self.layers, self.ws, x[1:]):
             y = w1*layer(y) + w2*xx
@@ -878,11 +861,8 @@ class WAdd(nn.Module):
     
 # two-layers
 class WAdd2(nn.Module):
-    def __init__(self, ch, layer='pw_conv', reverse=False):
+    def __init__(self, ch, layer='pw_conv'):
         super().__init__()
-        self.reverse = reverse
-        ch = ch[::-1] if self.reverse else ch
-
         feature_size = self.get_feature_size(ch)
         
         self.layers = []
@@ -903,8 +883,6 @@ class WAdd2(nn.Module):
         return int(min(ch))
 
     def forward(self, x):
-        x = x[::-1] if self.reverse else x
-
         y = self.ws[0] * self.layers[0](x[0])
         for w, layer, xx in zip(self.ws[1:], self.layers[1:], x[1:]):
             y += w * layer(xx)
