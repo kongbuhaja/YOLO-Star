@@ -175,3 +175,7 @@ pnnx*
 calibration_*.npy
 
 .github
+
+val.sh
+train.sh
+test.ipynb
