@@ -83,3 +83,77 @@ All Experiment is processed with RTX 4090 1-way
     </tr>
   </tbody>
 </table>
+<br>
+  
+
+### Comparison with object scale
+<table>
+  <thead>
+    <tr>
+      <th rowspan="2" align="center">Model</th>
+      <th colspan="4" align="center">mAP</th>
+    </tr>
+    <tr>
+      <th align="center">All</th>
+      <th align="center">Small</th>
+      <th align="center">Medium</th>
+      <th align="center">Large</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left"><b>YOLO8n</b></td>
+      <td align="center">37.4</td>
+      <td align="center">18.8</td>
+      <td align="center">41.0</td>
+      <td align="center">53.5</td>
+    </tr>
+    <tr>
+      <th align="left"><b>YOLO8n-Star</b></th>
+      <th align="center">38.4<sub>(+1.0%)</sub></th>
+      <th align="center">20.0<sub>(+1.2%)</sub></th>
+      <th align="center">42.2<sub>(+1.2%)</sub></th>
+      <th align="center">53.5<sub>(+0.0%)</sub></th>
+    </tr>
+    <tr>
+      <td align="left"><b>YOLO10n</b></td>
+      <td align="center">38.5</td>
+      <td align="center">19.0</td>
+      <td align="center">42.3</td>
+      <td align="center">54.6</td>
+    </tr>
+    <tr>
+      <th align="left"><b>YOLO10n-Star</b></sub></th>
+      <th align="center">39.7<sub>(+1.2%)</sub></th>
+      <th align="center">20.4<sub>(+1.4%)</sub></th>
+      <th align="center">43.4<sub>(+1.1%)</sub></th>
+      <th align="center">56.5<sub>(+1.9%)</sub></th>
+    </tr>
+    <tr>
+      <td align="left"><b>YOLO11n</b></td>
+      <td align="center">39.4</td>
+      <td align="center">19.8</td>
+      <td align="center">43.2</td>
+      <td align="center">57.0</td>
+    </tr>
+    <tr>
+      <th align="left"><b>YOLO11n-Star</b></sub></th>
+      <th align="center">40.2<sub>(+0.8%)</sub></th>
+      <th align="center">21.2<sub>(+1.4%)</sub></th>
+      <th align="center">44.5<sub>(+1.3%)</sub></th>
+      <th align="center">56.9<sub>(−0.1%)</sub></th>
+    </tr>
+    <tr>
+      <td align="left"><b>YOLO12n</b></td>
+      <td align="center">40.6</td>
+      <td align="center">20.4</td>
+      <td align="center">45.2</td>
+      <td align="center">58.4</td>
+    </tr>
+    <tr>
+      <th align="left"><b>YOLO12n-Star</b></sub></th>
+      <th align="center">41.7<sub>(+1.1%)</sub></th>
+      <th align="center">22.4<sub>(+2.2%)</sub></th>
+      <th align="center">46.4<sub>(+1.2%)</sub></th>
+      <th align="center">58.9<sub>(+0.5%)</sub></th>
+    </tr>
