@@ -17,27 +17,27 @@ All Experiment is processed with RTX 4090 1-way
 <table>
   <thead>
     <tr>
-      <th style="text-align:center;">Model</th>
-      <th style="text-align:center;">mAP<sup>val</sup><br><sup>50-95</sup></th>
-      <th style="text-align:center;">Time (ms)<br><sup>TensorRT(FP16)</sup></th>
-      <th style="text-align:center;">Params<br><sup>(M)</sup></th>
-      <th style="text-align:center;">FLOPs<br><sup>(G)</sup></th>
+      <th align="center">Model</th>
+      <th align="center">mAP<sup>val</sup><br><sup>50-95</sup></th>
+      <th align="center">Time (ms)<br><sup>TensorRT(FP16)</sup></th>
+      <th align="center">Params<br><sup>(M)</sup></th>
+      <th align="center">FLOPs<br><sup>(G)</sup></th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td align="center"><b>YOLO8n</b></td>
-      <td style="text-align:center;">37.4</td>
-      <td style="text-align:center;">0.5359</td>
-      <td style="text-align:center;">3.152</td>
-      <td style="text-align:center;">8.7</td>
+      <td align="center">37.4</td>
+      <td align="center">0.5359</td>
+      <td align="center">3.152</td>
+      <td align="center">8.7</td>
     </tr>
     <tr>
-      <th style="text-align:center;"><b>YOLO8n-Star</b></th>
-      <th style="text-align:center;">38.4</th>
-      <th style="text-align:center;">0.5460</th>
-      <th style="text-align:center;">3.173</th>
-      <th style="text-align:center;">8.9</th>
+      <th align="center"><b>YOLO8n-Star</b></th>
+      <th align="center">38.4</th>
+      <th align="center">0.5460</th>
+      <th align="center">3.173</th>
+      <th align="center">8.9</th>
     </tr>
     <tr>
       <td style="text-align:center;"><b>YOLO10n</b></td>
