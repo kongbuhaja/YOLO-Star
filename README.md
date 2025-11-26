@@ -26,11 +26,11 @@ All Experiment is processed with RTX 4090 1-way
   </thead>
   <tbody>
     <tr>
-      <td align="center"><b>YOLO8n</b></td>
-      <td align="center">37.4</td>
-      <td align="center">0.5359</td>
-      <td align="center">3.152</td>
-      <td align="center">8.7</td>
+      <td align="left"><b>YOLO8n</b></td>
+      <td align="left">37.4</td>
+      <td align="left">0.5359</td>
+      <td align="left">3.152</td>
+      <td align="left">8.7</td>
     </tr>
     <tr>
       <th align="left"><b>YOLO8n-Star</b></th>
