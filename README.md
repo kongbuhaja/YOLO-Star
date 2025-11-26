@@ -34,7 +34,7 @@ All Experiment is processed with RTX 4090 1-way
     </tr>
     <tr>
       <th align="left"><b>YOLO8n-Star</b></th>
-      <th align="left">38.4<small>(+1.0%)</small></th>
+      <th align="left">38.4<span style="font-size: 70%;">(+1.0%)</span></th>
       <th align="left">0.5460<small>(+1.88%)</small></th>
       <th align="left">3.173<small>(+0.67%)</small></th>
       <th align="left">8.9</th>
