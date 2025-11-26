@@ -17,7 +17,7 @@ All Experiment is processed with RTX 4090 1-way
 <table>
   <thead>
     <tr>
-      <th style="text-align:center;">Model</th>
+      <th align="center">Model</th>
       <th style="text-align:center;">mAP<sup>val</sup><br><sup>50-95</sup></th>
       <th style="text-align:center;">Time (ms)<br><sup>TensorRT(FP16)</sup></th>
       <th style="text-align:center;">Params<br><sup>(M)</sup></th>
