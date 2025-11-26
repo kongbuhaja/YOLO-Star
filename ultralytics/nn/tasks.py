@@ -1224,10 +1224,6 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             args = [c1, c2, *args[1:]]
         elif m is CBFuse:
             c2 = ch[f[-1]]
-        elif m is Star:
-            ch_ = [ch[x] for x in f]
-            c2 = max(ch_)
-            args = [ch_]
         elif m in [Star, Star2, Add, Add2, WAdd, WAdd2]:
             ch_ = [ch[x] for x in f]
             c2 =  ch_[-1]

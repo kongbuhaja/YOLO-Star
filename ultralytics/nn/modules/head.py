@@ -176,7 +176,12 @@ class Detect2(Detect):
         c2, c3 = max((16, ch[0] // 4, self.reg_max * 4)), max(ch[0], min(self.nc, 100))  # channels
 
         self.cv2 = nn.ModuleList(
-            nn.Sequential(DWConv(x, c2, 3), Conv(c2, c2, 3), nn.Conv2d(c2, 4 * self.reg_max, 1)) for x in ch
+            nn.Sequential(
+                nn.Sequential(DWConv(x, x, 3), Conv(x, c2)),
+                nn.Sequential(DWConv(c2, c2, 3), Conv(c2, c2, 1)),
+                nn.Conv2d(c2, 4 * self.reg_max, 1),
+            ) 
+            for x in ch
         )
         self.cv3 = (
             nn.ModuleList(nn.Sequential(DWConv(x, c3, 3), Conv(c3, c3, 3), nn.Conv2d(c3, self.nc, 1)) for x in ch)
