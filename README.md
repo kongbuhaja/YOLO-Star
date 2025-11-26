@@ -33,11 +33,11 @@ All Experiment is processed with RTX 4090 1-way
       <td align="center">8.7</td>
     </tr>
     <tr>
-      <th align="center"><b>YOLO8n-Star</b></th>
-      <th align="center">38.4</th>
-      <th align="center">0.5460</th>
-      <th align="center">3.173</th>
-      <th align="center">8.9</th>
+      <th align="left"><b>YOLO8n-Star</b></th>
+      <th align="left">38.4<small>(+1.0%)</small></th>
+      <th align="left">0.5460<small>(+1.88%)</small></th>
+      <th align="left">3.173<small>(+0.67%)</small></th>
+      <th align="left">8.9</th>
     </tr>
     <tr>
       <td align="center"><b>YOLO10n</b></td>
@@ -48,9 +48,9 @@ All Experiment is processed with RTX 4090 1-way
     </tr>
     <tr>
       <th align="center"><b>YOLO10n-Star</b></th>
-      <th align="center">39.7</th>
-      <th align="center">0.6330</th>
-      <th align="center">2.784</th>
+      <th align="center">39.7<small>(+1.2%)</small></th>
+      <th align="center">0.6330<small>(+0.35%)</small></th>
+      <th align="center">2.784<small>(+1.2%)</small></th>
       <th align="center">8.7</th>
     </tr>
     <tr>
@@ -62,9 +62,9 @@ All Experiment is processed with RTX 4090 1-way
     </tr>
     <tr>
       <th align="center"><b>YOLO11n-Star</b></th>
-      <th align="center">40.2</th>
-      <th align="center">0.6525</th>
-      <th align="center">2.642</th>
+      <th align="center">40.2<small>(+0.8%)</small></th>
+      <th align="center">0.6525<small>(+0.69%)</small></th>
+      <th align="center">2.642<small>(+0.97%)</small></th>
       <th align="center">6.6</th>
     </tr>
     <tr>
@@ -76,9 +76,9 @@ All Experiment is processed with RTX 4090 1-way
     </tr>
     <tr>
       <th align="center"><b>YOLO12n-Star</b></th>
-      <th align="center">41.7</th>
-      <th align="center">0.8839</th>
-      <th align="center">2.633</th>
+      <th align="center">41.7<small>(+1.1%)</small></th>
+      <th align="center">0.8839<small>(+0.34%)</small></th>
+      <th align="center">2.633<small>(+1.61%)</small></th>
       <th align="center">6.7</th>
     </tr>
   </tbody>
