@@ -17,7 +17,7 @@ All Experiment is processed with RTX 4090 1-way
 <table>
   <thead>
     <tr>
-      <th align="center">Model</th>
+      <th style="text-align:center;">Model</th>
       <th style="text-align:center;">mAP<sup>val</sup><br><sup>50-95</sup></th>
       <th style="text-align:center;">Time (ms)<br><sup>TensorRT(FP16)</sup></th>
       <th style="text-align:center;">Params<br><sup>(M)</sup></th>
@@ -26,7 +26,7 @@ All Experiment is processed with RTX 4090 1-way
   </thead>
   <tbody>
     <tr>
-      <td style="text-align:center;"><b>YOLO8n</b></td>
+      <td align="center"><b>YOLO8n</b></td>
       <td style="text-align:center;">37.4</td>
       <td style="text-align:center;">0.5359</td>
       <td style="text-align:center;">3.152</td>
