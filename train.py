@@ -35,10 +35,9 @@ else:
 model_file = args.model if '.pt' in args.model else f'{args.model}.yaml'
 model = YOLO(f"{model_file}").to(device)
 
-pat = re.compile(r'([0-9]+)([nslmx])?$')
-m = pat.search(model_file.split(".")[0])
-version = m.group(1)
-size = m.group(2) or "n"
+m = re.search(r"yolo(?P<version>\d+)(?P<size>[nsmlx])", model_file.split(".")[0])
+version = m.group("version")
+size = m.group("size") or "n"
 
 cfg = dict()
 if size == "n":
@@ -52,7 +51,7 @@ elif size == "s":
 elif size == "x":
     cfg["batch"] = 8
 
-    
+args.epochs = 1
 cfg.update(dict(
     workers = args.workers,
     data = f'{args.data}.yaml',
