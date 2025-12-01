@@ -7,7 +7,7 @@ parser.add_argument('--model', dest='model', type=str, default='yolov10n')
 parser.add_argument('--data', dest='data', type=str, default='coco')
 parser.add_argument('--cpus', dest='cpus', type=str, default='0-15', help='How many cpus do you want to use')
 parser.add_argument('--gpus', dest='gpus', type=str, default='0', help='which device do you want to use')
-parser.add_argument('--n', dest='n', type=int, default=3, help='how many time to run for test')
+parser.add_argument('--n', dest='n', type=int, default=7, help='how many time to run for test')
 
 args = parser.parse_args()
 
