@@ -41,7 +41,7 @@ size = m.group("size") or "n"
 
 cfg = dict()
 if size == "n":
-    cfg["batch"] = 64
+    cfg["batch"] = 128
 elif size == "s":
     cfg["batch"] = 48 if version == "12" else 64
 # elif size == "m":

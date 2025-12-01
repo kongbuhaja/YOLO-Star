@@ -33,22 +33,16 @@ else:
 model_file = args.model if '.pt' in args.model else f'{args.model}.yaml'
 model = YOLO(f"{model_file}")
 
-# values = []
-# for _ in range(args.n):
-#     trt = model.benchmark(data=f'{args.data}.yaml', format='engine', half=True, imgsz=640, device=0)
-#     values += [trt.values[0][3:]]
-# values = np.array(sorted(values, key=lambda x : x[1])[1:-1]).T
-# values = np.array(sorted(values, key=lambda x : x[1])).T
+values = []
+for _ in range(args.n):
+    trt = model.benchmark(data=f'{args.data}.yaml', format='engine', half=True, imgsz=640, device=0)
+    values += [trt.values[0][3:]]
+values = np.array(sorted(values, key=lambda x : x[1])[1:-1]).T
+values = np.array(sorted(values, key=lambda x : x[1])).T
 
 results = model.val(data = f'{args.data}.yaml',
           save_json=True)
 
-if args.data == "VisDrone":
-    from VisDrone import evaluate
-
-    pred_json_file = f"{results.save_dir}/predictions.json"
-    evaluate(pred_json_file)
-
-# print(f"avg trt mAP: {np.mean(values[0]):.4f}")
-# print(f"avg inference time: {np.mean(values[1]):.4f} ms")
-# print(f"avg FPS: {np.mean(values[2]):.2f}")
+print(f"avg trt mAP: {np.mean(values[0]):.4f}")
+print(f"avg inference time: {np.mean(values[1]):.4f} ms")
+print(f"avg FPS: {np.mean(values[2]):.2f}")
